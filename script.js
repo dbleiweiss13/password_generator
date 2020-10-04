@@ -10,6 +10,13 @@ var lowerInput = document.querySelector("#lower");
 var upperInput = document.querySelector("#upper");
 var numberInput = document.querySelector("#number");
 var specialInput = document.querySelector("#special");
+var duplicateInput = document.querySelector("#duplicates")
+
+
+var lenErrorString = document.querySelector("#errorMessageLen")
+var charErrorString = document.querySelector("#errorMessageChar")
+var dupErrorString = document.querySelector("#errorMessageDup")
+
 
 // Write password to the #password input
 function writePassword() {
@@ -17,7 +24,11 @@ function writePassword() {
   var charArray = charInputsSelected();
 
   //make sure all conditions are met before generating password
-  if (lengthInputTest() && charArray.length > 0) {
+  if (lengthInputTest() && charArray.length > 0 && duplicateCheck()) {
+
+    // removes printed error messages
+    lenErrorString.textContent = ''
+    charErrorString.textContent = ''
 
     var password = generatePassword(charArray);
     var passwordText = document.querySelector("#password");
@@ -68,19 +79,22 @@ function generatePassword(charArray) {
   
   //add the appropriate number of each character selected
   var selectedIndex = 0;
+  var noDuplicates = duplicateInput.checked;
+
+  console.log(noDuplicates)
 
   if(selectedChars.indexOf("lowercase") != -1) {
-    lowercaseVals = returnRandomVals(numberOfEachChars[selectedIndex],letters)
+    lowercaseVals = returnRandomVals(numberOfEachChars[selectedIndex],letters,noDuplicates)
     selectedIndex++;
   }
 
   if(selectedChars.indexOf("numeric") != -1) {
-    numericVals = returnRandomVals(numberOfEachChars[selectedIndex],numbers)
+    numericVals = returnRandomVals(numberOfEachChars[selectedIndex],numbers,noDuplicates)
     selectedIndex++;
   }
   
   if(selectedChars.indexOf("uppercase") != -1) {
-    uppercaseVals = returnRandomVals(numberOfEachChars[selectedIndex],letters)
+    uppercaseVals = returnRandomVals(numberOfEachChars[selectedIndex],letters,noDuplicates)
     for(let i = 0; i < uppercaseVals.length; i++) {
       uppercaseVals[i] = uppercaseVals[i].toUpperCase()
     }
@@ -88,7 +102,7 @@ function generatePassword(charArray) {
   }
   
   if(selectedChars.indexOf("specialChar") != -1) {
-    specialCharVals = returnRandomVals(numberOfEachChars[selectedIndex],charcters)
+    specialCharVals = returnRandomVals(numberOfEachChars[selectedIndex],charcters,noDuplicates)
     selectedIndex++;
   }
   
@@ -142,7 +156,8 @@ function lengthInputTest() {
     return(true)
   }
   else {
-    alert("you must select a number between 8 and 128");
+    // print error message to p tag on screen
+    lenErrorString.textContent = 'you must select a number between 8 and 128'
     return(false)
   }
 } 
@@ -150,11 +165,11 @@ function lengthInputTest() {
 //get the characters selected
 function charInputsSelected() {
   var charArray = []
-  if (lowerInput.checked == true) {
-    charArray.push("lowercase") 
-  }
   if (numberInput.checked == true) {
     charArray.push("numeric")
+  }
+  if (lowerInput.checked == true) {
+    charArray.push("lowercase") 
   }
   if (upperInput.checked == true) {
     charArray.push("uppercase")
@@ -165,19 +180,43 @@ function charInputsSelected() {
 
   // make sure that the appropriate conditions are met
   if (charArray.length == 0) {
-    alert("you must select atleast one character type to include");
+    // print error message to p tag on screen
+    charErrorString.textContent = 'you must select atleast one character type to include'
   }
 
   return(charArray)
 }
 
-// check if specialChar were chosen
+// if requested length is too long, password must contain duplicates
+function duplicateCheck() {
+  if(duplicateInput.checked) {
+    if (lengthInput.value.trim() <= 10) {
+      return(true)
+    }
+    else {
+      dupErrorString.textContent = "You can only remove duplicates for a password of 10 or fewer characters"
+      return(false)
+    }
+  }
+  else {
+    return(true)
+  }
+}
+
 
 // function to get random characters from each array
-function returnRandomVals(loopNum,array) {
+function returnRandomVals(loopNum,array,removeDuplicates) {
+  var checkArray = [...array]
   var returnArray = [];
   for (let i = 0; i < loopNum; i++) {
-    returnArray.push(array[Math.floor(Math.random() * array.length)])
+    returnArray.push(checkArray[Math.floor(Math.random() * checkArray.length)])
+
+    //remove duplicates if selected
+    if (removeDuplicates) {
+      var index = checkArray.indexOf(returnArray[i])
+      checkArray.splice(index,1)
+      console.log(checkArray)
+    }
   }
 
   return(returnArray);

@@ -126,6 +126,10 @@ form {
   margin-left: 15px;
 }
 
+#length {
+  width: 50px;
+}
+
 @media (max-width: 690px) {
   .btn {
     font-size: 1rem;
