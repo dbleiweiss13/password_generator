@@ -3,82 +3,62 @@ var generateBtn = document.querySelector("#generate");
 // array of possible values to pick from
 var letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 var numbers = ['1','2','3','4','5','6','7','8','9','0']
-var charcters = ['!','/"','#','$','%','&',"/'",'(',')','*','+',',','-','.','/',':',';','<','=','>','?','@','[','\\',"/'",']','^','_','{','|','}','~']
+var charcters = ['!','\"','#','$','%','&',"\'",'(',')','*','+',',','-','.','/',':',';','<','=','>','?','@','[','\\',"\'",']','^','_','{','|','}','~']
+
+var lengthInput = document.querySelector("#length");
+var lowerInput = document.querySelector("#lower");
+var upperInput = document.querySelector("#upper");
+var numberInput = document.querySelector("#number");
+var specialInput = document.querySelector("#special");
 
 // Write password to the #password input
 function writePassword() {
-  var password = generatePassword();
-  var passwordText = document.querySelector("#password");
+  //get character types selected by user
+  var charArray = charInputsSelected();
 
-  passwordText.value = password;
+  //make sure all conditions are met before generating password
+  if (lengthInputTest() && charArray.length > 0) {
 
+    var password = generatePassword(charArray);
+    var passwordText = document.querySelector("#password");
+
+    passwordText.value = password;
+  }
 }
 
 // Add event listener to generate button
 generateBtn.addEventListener("click", writePassword);
 
 // Function to generate password 
-function generatePassword() {
+function generatePassword(charArray) {
   
   //get password length
-  var lenthPicked = false;
+  var length = lengthInput.value.trim();
 
-  while(lenthPicked == false) {
-    var length = passwordLength();
-
-    if (length >= 8 && length <= 128) {
-      lenthPicked = true;
-      console.log(length);
-    }
-    else {
-      alert("you must select a number between 8 and 128");
-    }
-  }
-
-  //get Character to include
-  // character types to choose from
-  var characterTypes = ["special characters","uppercase","lowercase","numeric"];
-  var selectedChars = [];
-  var charsPicked = false;
-
-  // loop through each character type available
-  while(charsPicked == false) {
-    for(let i = 0; i < characterTypes.length; i++) {
-      selectedChars = selectChar(characterTypes[i],selectedChars);
-    }
-
-    if (selectedChars.length > 0) {
-      charsPicked = true;
-    } 
-    else {
-      alert("you must select atleast one character to include");
-    }
-  }
+  //get character types selected by user
+  var selectedChars = charArray;
 
   // determine how many of each character should be included
   var numberOfEachChars = [];
-  var percentageRemaining = 100 ;
-  var checkLen = length
+  var percentageRemaining = length ;
 
   //select random number of elements to pick for each character selected
   for (let i = 0; i < selectedChars.length - 1; i++) {
-    var ranNum = Math.floor(Math.random() * checkLen)
+    var ranNum = Math.floor(Math.random() * (percentageRemaining * 0.8))
     if (ranNum == 0) {
       ranNum = 1;
     }
     numberOfEachChars.push(ranNum) 
-    checkLen -= numberOfEachChars[i]
+    percentageRemaining -= numberOfEachChars[i]
   }
 
-  if (checkLen == 0 ) {
+  //if the total number of characters that have been assigned is equal to the password length, remove 1 from he largest num and add to the last
+  if (percentageRemaining == 0 && selectedChars.length > 1) {
     var n = numberOfEachChars.indexOf(Math.max(numberOfEachChars))
-
     numberOfEachChars[n] = numberOfEachChars[n] - 1;
-    checkLen = 1
+    percentageRemaining = 1
   }
-  numberOfEachChars.push(checkLen)
-
-  console.log(numberOfEachChars)
+  numberOfEachChars.push(percentageRemaining)
 
   //picked characters
   var specialCharVals = [];
@@ -107,17 +87,12 @@ function generatePassword() {
     selectedIndex++;
   }
   
-  if(selectedChars.indexOf("special characters") != -1) {
+  if(selectedChars.indexOf("specialChar") != -1) {
     specialCharVals = returnRandomVals(numberOfEachChars[selectedIndex],charcters)
     selectedIndex++;
   }
-
-  console.log(lowercaseVals)
-  console.log(numericVals)
-  console.log(uppercaseVals)
-  console.log(specialCharVals)
   
-  //Build Password
+  //Build Password by ranomizing the order of the random character types selected
   var passwordString = "";
   var charPicked;
 
@@ -126,8 +101,6 @@ function generatePassword() {
 
     while (charPicked == false) {
       var chooseChar = selectedChars[Math.floor(Math.random() * selectedChars.length)]
-
-      console.log(chooseChar)
 
       if (chooseChar == "lowercase") {
         if (lowercaseVals.length > 0) {
@@ -150,7 +123,7 @@ function generatePassword() {
           charPicked = true
         }
       }
-      else if (chooseChar == "special characters") {
+      else if (chooseChar == "specialChar") {
         if (specialCharVals.length > 0) {
           passwordString = passwordString + specialCharVals[0];
           specialCharVals.shift();
@@ -159,25 +132,46 @@ function generatePassword() {
       }
     }
   }
-
   return(passwordString)
 }
 
-
-//Get Password length
-function passwordLength() {
-  return(prompt("How long should the password be? pick a number between 8-128"));
-}
-
-//Get special character choices
-function selectChar(char,selectedChars) {
-  var toInclude = confirm("should the password include " + char);
-
-  if(toInclude) {
-    selectedChars.push(char);
+//check password length
+function lengthInputTest() {
+  var num = lengthInput.value.trim()
+  if(num >= 8 && num <= 128) {
+    return(true)
   }
-  return(selectedChars);
+  else {
+    alert("you must select a number between 8 and 128");
+    return(false)
+  }
+} 
+
+//get the characters selected
+function charInputsSelected() {
+  var charArray = []
+  if (lowerInput.checked == true) {
+    charArray.push("lowercase") 
+  }
+  if (numberInput.checked == true) {
+    charArray.push("numeric")
+  }
+  if (upperInput.checked == true) {
+    charArray.push("uppercase")
+  }
+  if (specialInput.checked == true) {
+    charArray.push("specialChar")
+  }
+
+  // make sure that the appropriate conditions are met
+  if (charArray.length == 0) {
+    alert("you must select atleast one character type to include");
+  }
+
+  return(charArray)
 }
+
+// check if specialChar were chosen
 
 // function to get random characters from each array
 function returnRandomVals(loopNum,array) {
@@ -188,5 +182,3 @@ function returnRandomVals(loopNum,array) {
 
   return(returnArray);
 }
-
-
