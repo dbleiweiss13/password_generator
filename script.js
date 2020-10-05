@@ -27,8 +27,9 @@ function writePassword() {
   if (lengthInputTest() && charArray.length > 0 && duplicateCheck()) {
 
     // removes printed error messages
-    lenErrorString.textContent = ''
-    charErrorString.textContent = ''
+    lenErrorString.textContent = '';
+    charErrorString.textContent = '';
+    dupErrorString.textContent = '';
 
     var password = generatePassword(charArray);
     var passwordText = document.querySelector("#password");
@@ -81,7 +82,7 @@ function generatePassword(charArray) {
   var selectedIndex = 0;
   var noDuplicates = duplicateInput.checked;
 
-  console.log(noDuplicates)
+  // console.log(noDuplicates)
 
   if(selectedChars.indexOf("lowercase") != -1) {
     lowercaseVals = returnRandomVals(numberOfEachChars[selectedIndex],letters,noDuplicates)
@@ -215,7 +216,7 @@ function returnRandomVals(loopNum,array,removeDuplicates) {
     if (removeDuplicates) {
       var index = checkArray.indexOf(returnArray[i])
       checkArray.splice(index,1)
-      console.log(checkArray)
+      // console.log(checkArray)
     }
   }
 
